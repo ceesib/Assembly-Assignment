@@ -251,6 +251,15 @@ print_buffer3:
     
     j readLoop
 close_files:
+	mtc1 $s5,$f5
+	cvt.s.w $f5,$f5
+	mtc1 $s6,$f1
+	cvt.s.w $f1,$f1
+	mtc1 $s3,$f2
+	cvt.s.w $f2,$f2
+	div.s $f3,$f5,$f2
+	div.s $f4,$f1,$f2
+	
     li $v0, 16
     move $a0, $s0
     syscall
@@ -260,5 +269,25 @@ close_files:
     syscall
 
 exit:
+	
+	li $v0,4
+	la $a0,str1
+	syscall
+	
+	li $v0,2
+	mov.s $f12,$f3
+	syscall
+	
+	li $v0,4
+	la $a0,line
+	syscall
+	
+	li $v0,4
+	la $a0,str2
+	syscall
+	
+	li $v0,2
+	mov.s $f12,$f4
+	syscall
     li $v0, 10
     syscall
