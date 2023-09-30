@@ -1,5 +1,5 @@
 .data
-    filePathIn:     .asciiz "C:\Users\ceejay sibeko\Downloads\house_64_in_ascii_crlf.ppm"   # Input file path
+    filePathIn:     .asciiz "C:\Users\ceejay sibeko\Downloads\house_64_in_ascii_crlf.ppm" 	# Input file path
     filePathOut:    .asciiz "C:\Users\ceejay sibeko\Downloads\increase_brightness.ppm"		# Output file path
     fileWords:      .space 1024                                                            	# Buffer for reading from the input file
     buffer:         .space 1024                                                            	# Buffer for integer-to-string conversion
@@ -263,14 +263,14 @@ print_buffer3:
     j readLoop
 
 close_files:
-    mtc1 $s5, $f5       # Move sum of pixel values in original image to $f5
-    cvt.s.w $f5, $f5    # Convert integer to float in $f5
-    mtc1 $s6, $f1       # Move sum of pixel values in new image to $f1
-    cvt.s.w $f1, $f1    # Convert integer to float in $f1
-    mtc1 $s3, $f2       # Move constant divisor to $f2
-    cvt.s.w $f2, $f2    # Convert integer to float in $f2
-    div.s $f3, $f5, $f2 # Calculate average pixel value of original image
-    div.s $f4, $f1, $f2 # Calculate average pixel value of new image
+    mtc1.d $s5, $f4       # Move sum of pixel values in original image to $f4
+    cvt.d.w $f4, $f4    # Convert integer to float in $f4
+    mtc1.d $s6, $f6       # Move sum of pixel values in new image to $f6
+    cvt.d.w $f6, $f6    # Convert integer to float in $f6
+    mtc1.d $s3, $f2       # Move constant divisor to $f2
+    cvt.d.w $f2, $f2    # Convert integer to float in $f2
+    div.d $f0, $f4, $f2 # Calculate average pixel value of original image
+    div.d $f8, $f6, $f2 # Calculate average pixel value of new image
 
     li $v0, 16
     move $a0, $s0
@@ -285,8 +285,8 @@ exit:
     la $a0, str1
     syscall
 
-    li $v0, 2
-    mov.s $f12, $f3
+    li $v0, 3
+    mov.d $f12, $f0
     syscall
 
     li $v0, 4
@@ -297,8 +297,8 @@ exit:
     la $a0, str2
     syscall
 
-    li $v0, 2
-    mov.s $f12, $f4
+    li $v0, 3
+    mov.d $f12, $f8
     syscall
 
     li $v0, 10
