@@ -44,25 +44,27 @@ main:
     li $s3, 3
 
 readLoop0:
-    beq $t0, 4, readLoop1
+    beq $t0, 4, readLoop1	# If we have read the header lines, go to the next loop
     li $v0, 14
     move $a0, $s0
     la $a1, fileWords
     li $a2, 1
     syscall
 
-    beq $v0, $zero, close_files
+    beq $v0, $zero, close_files	 # If the read operation fails, close the files
     la $t4, fileWords
     lb $s4, 0($t4)
 
-    beq $s4, 10, increment
+    beq $s4, 10, increment 	# If we encounter a newline character, increment and continue
 
     j readLoop0
 
 increment:
     addi $t0, $t0, 1
     j readLoop0
+	
 readLoop1:
+	# Read and ignore PPM header lines
 	li $v0, 15
     move $a0, $s1
     la $a1, ppm
@@ -112,22 +114,23 @@ readLoop1:
 	
 	li $t0,0
 	
- j readLoop
+ j readLoop	# Continue to the main reading loop
  
 
 readLoop:
+	
     li $v0, 14
     move $a0, $s0
     la $a1, fileWords
     li $a2, 1
     syscall
 
-    beqz $v0, close_files
+    beqz $v0, close_files	# If we reach the end of the file, close the files
 
     la $t4, fileWords
     lb $t1, 0($t4)
 
-    beq $t1, 10, average
+    beq $t1, 10, average	 # If we encounter a newline character, calculate the average
 
     sub $t2, $t1, $t7
     mul $t6, $t6, $t5
@@ -136,24 +139,25 @@ readLoop:
     j readLoop
 
 average:
-add  $s5,$s5,$t6
-li $t6,0
-beq $t0,2,reset
-addi $t0,$t0,1
+
+add  $s5,$s5,$t6 	# Add the pixel value to the sum
+li $t6,0			# Reset temporary pixel value
+beq $t0,2,reset		# If we've processed all pixels, go to the reset step
+addi $t0,$t0,1		# Increment pixel count
 j readLoop
 
 
 reset:
-	li $t0,0
-    la $t9, buffer
-	mtc1 $s5,$f0
-	mtc1 $s3,$f1
-	li $s5,0
-	cvt.s.w $f0,$f0
-	cvt.s.w $f1,$f1
-	div.s $f0,$f0,$f1
-	cvt.w.s $f0,$f0
-	mfc1 $t6,$f0
+	li $t0,0			# Reset pixel count
+    la $t9, buffer		# Load the buffer for integer-to-string conversion
+	mtc1 $s5,$f0		# Move sum of pixel values in original image to $f0
+	mtc1 $s3,$f1		# Move constant divisor to $f1
+	li $s5,0			# Reset sum of pixel values in original image
+	cvt.s.w $f0,$f0		# Convert integer to float in $f0
+	cvt.s.w $f1,$f1		# Convert integer to float in $f1
+	div.s $f0,$f0,$f1	# Calculate average pixel value
+	cvt.w.s $f0,$f0		# Convert float to integer
+	mfc1 $t6,$f0		# Move the integer result to $t6
 	
     j convert_int_to_str
 
@@ -202,15 +206,15 @@ end_conversion:
     la $t5, buffer2
 copy_loop:
     lb $t0, 0($t9)
-	beqz $t0, options
+	beqz $t0, options	# If we've copied the entire string, proceed to options
     sb $t0, 0($t5)
     addi $t9, $t9, -1
     addi $t5, $t5, 1
    
     j copy_loop
 options:
-	beq $t2,2,print_buffer3
-	beq $t2,3,print_buffer2
+	beq $t2,2,print_buffer3	 # If the digit count is 2, print buffer3
+	beq $t2,3,print_buffer2	 # If the digit count is 3, print buffer2
 print_buffer2:
     # Write the integer-as-a-string to the output file
     li $v0, 15
